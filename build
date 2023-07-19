@@ -1,0 +1,36 @@
+#!/usr/bin/bash
+
+OS=( linux windows darwin )
+ARCH=( amd64 arm arm64 )
+
+test -d dist || mkdir dist
+
+function d {
+    echo "[ $(date) ] $1"
+}
+
+function ldflags {
+    BRANCH=$(git branch --show-current)
+    COMMIT=$(git rev-parse --short HEAD)
+    VERSION=$(git describe --tags --abbrev=0)        
+    echo "-X 'main.GitBranch=${BRANCH}' -X 'main.GitCommit=${COMMIT}' -X 'main.GitVersion=${VERSION}'"
+}
+
+for os_ in ${OS[@]}; do 
+    for arch_ in ${ARCH[@]}; do
+        test $( go tool dist list  | grep -wc $os_/$arch_ ) -ne 1 && continue
+        test "$os_/$arch_" == "windows/arm" && continue;
+        cd pmm-dump
+        d "Building pmm-dump on $os_/$arch_"
+        GOOS=${os_} GOARCH=${arch_} go build -ldflags "$(ldflags)" -o ../dist/pmm-dump.${os_}.${arch_} pmm-dump/cmd/pmm-dump
+        cd ..
+
+        cd percona-toolkit/src/go
+
+        for pkg in pt-k8s-debug-collector pt-mongodb-index-check pt-mongodb-query-digest pt-mongodb-summary pt-pg-summary pt-secure-collect; do
+        d "Building $pkg on $os_/$arch_"
+            GOOS=${os_} GOARCH=${arch_} go build -ldflags "$(ldflags)" -o ../../../dist/${pkg}.${os_}.${arch_} ./${pkg}
+        done;
+        cd ../../..
+    done;
+done;

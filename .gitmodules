@@ -1,0 +1,6 @@
+[submodule "percona-toolkit"]
+	path = percona-toolkit
+	url = https://github.com/percona/percona-toolkit
+[submodule "pmm-dump"]
+	path = pmm-dump
+	url = https://github.com/percona/pmm-dump
