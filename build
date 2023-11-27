@@ -17,12 +17,12 @@ function ldflags_pmm_dump {
 }
 
 function ldflags_pt {
-   CP=')'
-   VERSION=$(git log --no-walk --tags --pretty="%H %d" --decorate=short | head -n1 | awk  -F'[, $(CP)]' '{ print $5; }')
-   BUILD=$(date "+%FT%T%z")
-   GOVERSION=$(go version | cut --delimiter=" " -f3)
-   COMMIT=$(git rev-list -1 HEAD)
-   echo "-X main.Version=${VERSION} -X main.Build=${BUILD} -X main.GoVersion=${GOVERSION} -X main.Commit=${COMMIT} -s -w"
+    CP=')'
+    VERSION=$(git log --no-walk --tags --pretty="%H %d" --decorate=short | head -n1 | awk  -F'[, $(CP)]' '{ print $5; }')
+    BUILD=$(date "+%FT%T%z")
+    GOVERSION=$(go version | cut --delimiter=" " -f3)
+    COMMIT=$(git rev-list -1 HEAD)
+    echo "-X main.Version=${VERSION} -X main.Build=${BUILD} -X main.GoVersion=${GOVERSION} -X main.Commit=${COMMIT} -s -w"
 }
 
 for os_ in ${OS[@]}; do 
