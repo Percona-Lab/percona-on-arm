@@ -9,11 +9,20 @@ function d {
     echo "[ $(date) ] $1"
 }
 
-function ldflags {
+function ldflags_pmm_dump {
     BRANCH=$(git branch --show-current)
     COMMIT=$(git rev-parse --short HEAD)
-    VERSION=$(git describe --tags --abbrev=0)        
+    VERSION=$(git describe --tags --abbrev=0)
     echo "-X 'main.GitBranch=${BRANCH}' -X 'main.GitCommit=${COMMIT}' -X 'main.GitVersion=${VERSION}'"
+}
+
+function ldflags_pt {
+    CP=')'
+    VERSION=$(git log --no-walk --tags --pretty="%H %d" --decorate=short | head -n1 | awk  -F'[, $(CP)]' '{ print $5; }')
+    BUILD=$(date "+%FT%T%z")
+    GOVERSION=$(go version | cut --delimiter=" " -f3)
+    COMMIT=$(git rev-list -1 HEAD)
+    echo "-X main.Version=${VERSION} -X main.Build=${BUILD} -X main.GoVersion=${GOVERSION} -X main.Commit=${COMMIT} -s -w"
 }
 
 for os_ in ${OS[@]}; do 
@@ -22,14 +31,14 @@ for os_ in ${OS[@]}; do
         test "$os_/$arch_" == "windows/arm" && continue;
         cd pmm-dump
         d "Building pmm-dump on $os_/$arch_"
-        GOOS=${os_} GOARCH=${arch_} go build -ldflags "$(ldflags)" -o ../dist/pmm-dump.${os_}.${arch_} pmm-dump/cmd/pmm-dump
+        GOOS=${os_} GOARCH=${arch_} go build -ldflags "$(ldflags_pmm_dump)" -o ../dist/pmm-dump.${os_}.${arch_} pmm-dump/cmd/pmm-dump
         cd ..
 
         cd percona-toolkit/src/go
 
         for pkg in pt-k8s-debug-collector pt-mongodb-index-check pt-mongodb-query-digest pt-mongodb-summary pt-pg-summary pt-secure-collect; do
-        d "Building $pkg on $os_/$arch_"
-            GOOS=${os_} GOARCH=${arch_} go build -ldflags "$(ldflags)" -o ../../../dist/${pkg}.${os_}.${arch_} ./${pkg}
+            d "Building $pkg on $os_/$arch_"
+            GOOS=${os_} GOARCH=${arch_} go build -ldflags "$(ldflags_pt)" -o ../../../dist/${pkg}.${os_}.${arch_} ./${pkg}
         done;
         cd ../../..
     done;
