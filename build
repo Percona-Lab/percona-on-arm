@@ -18,7 +18,7 @@ function ldflags_pmm_dump {
 
 function ldflags_pt {
     CP=')'
-    VERSION=$(git log --no-walk --tags --pretty="%H %d" --decorate=short | head -n1 | awk  -F'[, $(CP)]' '{ print $5; }')
+    VERSION=$(git log --no-walk --tags --pretty="%H %d" --decorate=short | head -n1 | awk  -F'[, $(CP)]' '{ print $7; }')
     BUILD=$(date "+%FT%T%z")
     GOVERSION=$(go version | cut --delimiter=" " -f3)
     COMMIT=$(git rev-list -1 HEAD)
