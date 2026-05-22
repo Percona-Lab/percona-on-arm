@@ -5,6 +5,8 @@ ARCH=( amd64 arm arm64 )
 
 test -d dist || mkdir dist
 
+( cd percona-toolkit && go mod tidy )
+
 function d {
     echo "[ $(date) ] $1"
 }
